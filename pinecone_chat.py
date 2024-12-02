@@ -16,6 +16,7 @@ index = pc.Index(pinecone_index)
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
+
 corpus_directory = "./corpus"
 
 corpus = []
@@ -35,7 +36,13 @@ for i, document in enumerate(corpus):
     )
     embedding = embedding_response['data'][0]['embedding']
 
-    index.upsert([(file_names[i], embedding)])
+    metadata = {
+        "file_name": file_names[i],
+        "content": document[:500],  # Truncate content to 500 characters for metadata
+        "length": len(document)
+    }
+
+    index.upsert([(file_names[i], embedding, metadata)])
 
 def chat_with_context(query):
     query_embedding_response = openai.Embedding.create(
@@ -49,15 +56,19 @@ def chat_with_context(query):
         top_k=1,
         include_metadata=True
     )
-    
-    match = query_results['matches'][0]
-    closest_document = corpus[file_names.index(match['id'])]
-    similarity_score = match['score']
-    
-    # Prepare context for the chat
-    context = f"Context from document '{match['id']}':\n{closest_document}\n\nQuery: {query}"
 
-    # Send the context and query to OpenAI's Chat API
+    if not query_results['matches']:
+        return "No matching documents found."
+
+    match = query_results['matches'][0]
+    metadata = match['metadata']
+    similarity_score = match['score']
+
+    closest_content = metadata['content']
+    file_name = metadata['file_name']
+
+    context = f"Context from document '{file_name}':\n{closest_content}...\n\nQuery: {query}"
+
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
@@ -66,17 +77,15 @@ def chat_with_context(query):
         ]
     )
 
-    # Output the response
     return response['choices'][0]['message']['content']
 
-# Simple chat interface
 print("Chat Interface (type 'exit' to quit)")
 while True:
     user_query = input("\nYour query: ")
     if user_query.lower() == "exit":
         print("Exiting chat. Goodbye!")
         break
-    
+
     chat_response = chat_with_context(user_query)
     print("\nAssistant Response:")
     print(chat_response)
