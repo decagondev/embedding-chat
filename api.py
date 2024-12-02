@@ -21,6 +21,7 @@ CORS(app)
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
+
 @app.route("/upload", methods=["POST"])
 def upload_file():
     """
