@@ -13,6 +13,9 @@ openai==0.28.0
 openpyxl==3.1.5
 pandas==2.2.3
 pandas-stubs==2.2.3.241126
+pinecone==5.4.1
+pinecone-plugin-inference==3.0.0
+pinecone-plugin-interface==0.0.7
 propcache==0.2.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
@@ -21,6 +24,7 @@ requests==2.32.3
 six==1.16.0
 tqdm==4.67.1
 types-pytz==2024.2.0.20241003
+typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
 yarl==1.18.3
