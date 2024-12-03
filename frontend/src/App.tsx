@@ -1,11 +1,13 @@
 import './App.css'
-import FileUpload from './components/FileUpload'
+import Chat from './components/Chat'
+// import FileUpload from './components/FileUpload'
 
 function App() {
 
   return (
     <div className="flex">
-      <FileUpload />
+      {/* <FileUpload /> */}
+      <Chat />
     </div>
   )
 }

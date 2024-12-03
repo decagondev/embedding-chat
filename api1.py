@@ -60,8 +60,6 @@ def chat():
     """
     data = request.json
     query = data.get("query")
-    fe_messages = data.get("messages")
-
     if not query:
         return jsonify({"error": "Query not provided"}), 400
 
@@ -86,18 +84,13 @@ def chat():
     file_names = "\n\n".join([metadata['file_name'] for metadata in metadatas])
     contents = "\n\n".join([metadata['content'] for metadata in metadatas])
     context = f"Context from document '{file_names}':\n{contents}...\n\nQuery: {query}"
-    new_messages = []
-    new_messages.append({"role": "system", "content": "You are a helpful assistant."})
-    
-    for msg in fe_messages:
-            new_messages.append(msg)
-    
-    new_messages.append({"role": "user", "content": context})
-    
-    
+
     response = openai.ChatCompletion.create(
         model="gpt-4",
-        messages=new_messages
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": context}
+        ]
     )
 
     assistant_response = response['choices'][0]['message']['content']
