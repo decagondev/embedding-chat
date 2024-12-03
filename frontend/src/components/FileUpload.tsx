@@ -1,47 +1,50 @@
 import React, { useState } from "react";
 
 const FileUpload: React.FC = () => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [message, setMessage] = useState<string>("");
   const [isError, setIsError] = useState<boolean>(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      setSelectedFile(event.target.files[0]);
+      setSelectedFiles(event.target.files);
       setMessage("");
     }
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-      setMessage("Please select a file to upload.");
+    if (!selectedFiles) {
+      setMessage("Please select a files to upload.");
       setIsError(true);
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    try {
-      const response = await fetch("http://127.0.0.1:5001/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setMessage(result.message || "File uploaded successfully.");
-        setIsError(false);
-      } else {
-        setMessage(result.error || "Failed to upload the file.");
-        setIsError(true);
-      }
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      setMessage("An error occurred while uploading the file.");
-      setIsError(true);
+    for (let i = 0; i < selectedFiles.length; i++) {
+        const formData = new FormData();
+        formData.append("file", selectedFiles[i]);
+        
+        try {
+          const response = await fetch("http://127.0.0.1:5001/upload", {
+            method: "POST",
+            body: formData,
+          });
+    
+          const result = await response.json();
+    
+          if (response.ok) {
+            setMessage(result.message || "File uploaded successfully.");
+            setIsError(false);
+          } else {
+            setMessage(result.error || "Failed to upload the file.");
+            setIsError(true);
+          }
+        } catch (error) {
+          console.error("Error uploading file:", error);
+          setMessage("An error occurred while uploading the file.");
+          setIsError(true);
+        }
     }
+
   };
 
   return (
@@ -52,6 +55,7 @@ const FileUpload: React.FC = () => {
         accept=".txt"
         onChange={handleFileChange}
         className="mb-4 p-2 border border-gray-300 rounded-lg"
+        multiple
       />
       <button
         onClick={handleUpload}
